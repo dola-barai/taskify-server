@@ -31,10 +31,47 @@ async function run() {
         res.send(result)
     })
 
+    app.get('/alltasks/:id', async(req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await taskCollection.findOne(query);
+        res.send(result);
+    });
+
     app.post('/alltasks', async(req, res) => {
         const alltasks = req.body;
         console.log(alltasks);
         const result = await taskCollection.insertOne(alltasks);
+        res.send(result)
+    })
+
+    app.put('/alltasks/:id', async(req, res) => {
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)}
+        const options = { upsert: true };
+        const updatedTask = req.body;
+  
+        const task = {
+            $set: {
+                description: updatedTask.description, 
+                status: updatedTask.status, 
+                deadline: updatedTask.deadline, 
+            }
+        }
+  
+        const result = await taskCollection.updateOne(filter, task, options);
+        res.send(result);
+    })
+
+    app.patch('/alltasks/completed/:id', async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            status: 'Completed'
+          },
+        }
+        const result = await taskCollection.updateOne(filter, updateDoc)
         res.send(result)
     })
 
